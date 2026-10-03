@@ -3,15 +3,12 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-3776ab?style=flat-square)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?style=flat-square)](https://scikit-learn.org/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37726?style=flat-square)](https://jupyter.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ---
 
 ## Abstract
 
 This project implements a supervised machine learning pipeline for binary classification of bank marketing campaign outcomes. The objective is to predict whether a client will subscribe to a term deposit based on demographic, economic, and behavioral features. We employ Support Vector Machines with kernel-based non-linear transformations and address the critical challenge of class imbalance through balanced weighting, stratified sampling, and evaluation using class-sensitive metrics. The methodology includes systematic hyperparameter optimization and comprehensive preprocessing to prevent information leakage. Final results demonstrate an F1-score of 0.438 on the test set, balancing precision (0.353) and recall (0.575).
-
-**Keywords**: Support Vector Machines, classification, imbalanced learning, kernel methods, hyperparameter optimization
 
 ---
 
@@ -245,106 +242,3 @@ Actual Positive     476       582
 3. **Hyperparameter Scope**: Tuning limited to two primary parameters ($C$ and $\gamma$). A broader grid search with cross-validation could yield further improvements.
 
 4. **Decision Threshold**: The default classification threshold of 0.5 may not align with business objectives. Threshold optimization based on cost-benefit analysis could improve practical utility.
-
-### 5.3 Recommendations for Practitioners
-
-**Business Context Dependency**: The optimal model configuration depends on the relative costs of false positives versus false negatives:
-
-- **High-cost false positives** (e.g., expensive marketing outreach): Increase classification threshold (e.g., 0.7) to prioritize precision.
-- **High-cost false negatives** (e.g., significant lost revenue per customer): Decrease classification threshold (e.g., 0.3) to prioritize recall.
-- **Balanced scenario**: Maintain default threshold of 0.5, as current F1-score suggests reasonable balance.
-
-**Technical Improvements**:
-
-- Implement k-fold stratified cross-validation with GridSearchCV for more robust hyperparameter selection
-- Explore alternative algorithms (Random Forest, XGBoost, LightGBM) for comparative analysis
-- Apply SMOTE or ADASYN resampling techniques to address class imbalance
-- Conduct feature importance analysis (permutation importance, SHAP values)
-- Evaluate model calibration and perform threshold optimization
-- Implement cross-validation curves (learning curves) to diagnose bias-variance trade-off
-
----
-
-## 6. Installation and Usage
-
-### 6.1 Requirements
-
-```
-Python >= 3.9
-pandas >= 1.5
-numpy >= 1.23
-scikit-learn >= 1.3
-matplotlib >= 3.5
-seaborn >= 0.12
-jupyter >= 1.0
-```
-
-### 6.2 Setup
-
-```bash
-# Clone repository
-git clone https://github.com/SantiagoRodriguez114/modelSVM_marketing.git
-cd modelSVM_marketing
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate          # Linux/macOS
-# venv\Scripts\activate            # Windows
-
-# Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-### 6.3 Execution
-
-```bash
-# Launch Jupyter Notebook
-jupyter notebook SVM_marketing.ipynb
-
-# Or use JupyterLab
-jupyter lab SVM_marketing.ipynb
-```
-
-Execute the notebook cells sequentially. Output includes metrics, confusion matrices, and hyperparameter sensitivity plots.
-
----
-
-## 7. Repository Structure
-
-```
-modelSVM_marketing/
-├── README.md                      # Documentation
-├── requirements.txt               # Python dependencies
-├── SVM_marketing.ipynb            # Main analysis notebook
-├── bank-full.csv                  # Dataset
-└── .gitignore
-```
-
----
-
-## 8. References
-
-[1] Moro, S., Cortez, P., & Rita, P. (2014). A data-driven approach to predict the success of bank telemarketing. *Decision Support Systems*, 62, 22–31. https://doi.org/10.1016/j.dss.2014.03.001
-
-[2] Vapnik, V. N. (1995). *The Nature of Statistical Learning Theory*. Springer-Verlag.
-
-[3] He, H., & Garcia, E. A. (2009). Learning from imbalanced data. *IEEE Transactions on Knowledge and Data Engineering*, 21(9), 1263–1284. https://doi.org/10.1109/TKDE.2008.239
-
-[4] Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). SMOTE: Synthetic minority over-sampling technique. *Journal of Artificial Intelligence Research*, 16, 321–357.
-
-[5] Pedregosa, F., et al. (2011). scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
-
----
-
-## 9. Author
-
-**Santiago Rodríguez**
-
-Contact: rodriguezsanti751@gmail.com  
-GitHub: [@SantiagoRodriguez114](https://github.com/SantiagoRodriguez114)
-
----
-
-**License**: MIT  
-**Last Updated**: October 2026
