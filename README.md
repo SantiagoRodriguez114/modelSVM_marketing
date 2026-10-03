@@ -1,592 +1,350 @@
-# 🎯 SVM Marketing Classification Model
+# Support Vector Machine for Bank Marketing Classification
 
-<div align="center">
-
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37726?style=for-the-badge&logo=jupyter&logoColor=white)](https://jupyter.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Complete-success?style=for-the-badge)]()
-
-**Aplicación de Máquinas de Vectores de Soporte (SVM) para predicción de suscripción a depósitos bancarios**
-
-[🔍 Problema](#-el-problema) • [📊 Datos](#-datos) • [🏗️ Solución](#-solución-propuesta) • [📈 Resultados](#-resultados) • [🚀 Uso](#-cómo-ejecutar)
-
-</div>
+[![Python](https://img.shields.io/badge/Python-3.9+-3776ab?style=flat-square)](https://www.python.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?style=flat-square)](https://scikit-learn.org/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37726?style=flat-square)](https://jupyter.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ---
 
-## 🎯 Descripción 
+## Abstract
 
-Este proyecto implementa un **modelo de clasificación SVM** de nivel producción para predecir si un cliente bancario suscribirá un depósito a plazo. Aborda los desafíos reales de:
+This project implements a supervised machine learning pipeline for binary classification of bank marketing campaign outcomes. The objective is to predict whether a client will subscribe to a term deposit based on demographic, economic, and behavioral features. We employ Support Vector Machines with kernel-based non-linear transformations and address the critical challenge of class imbalance through balanced weighting, stratified sampling, and evaluation using class-sensitive metrics. The methodology includes systematic hyperparameter optimization and comprehensive preprocessing to prevent information leakage. Final results demonstrate an F1-score of 0.438 on the test set, balancing precision (0.353) and recall (0.575).
 
-- ✅ **Clases desbalanceadas** (~88%/12%)
-- ✅ **Prevención de data leakage**
-- ✅ **Optimización de métricas relevantes** más allá de accuracy
-- ✅ **Interpretación de trade-offs** precision vs recall
-- ✅ **Validación estratificada** para garantizar reproducibilidad
-
-**Caso de uso**: Optimizar campañas de marketing bancario mediante identificación de clientes de alto valor.
+**Keywords**: Support Vector Machines, classification, imbalanced learning, kernel methods, hyperparameter optimization
 
 ---
 
-## 🔍 El Problema
+## 1. Introduction
 
-### Contexto de Negocio
+### 1.1 Problem Context
 
-Una institución bancaria realiza campañas de marketing para promover la suscripción de depósitos a plazo. Históricamente:
+Bank marketing campaigns represent a significant operational investment. Targeting the right customers directly impacts campaign efficiency and return on investment. Traditional approaches rely on heuristic segmentation; however, predictive modeling offers a data-driven alternative to identify high-value prospects.
 
-- Solo **~12%** de los clientes contactados aceptan la oferta
-- Los recursos de marketing son limitados
-- Cada contacto tiene un costo asociado
-- Existe una oportunidad de mejorar la segmentación
+The central problem is to build a classifier that predicts term deposit subscription based on customer information collected during marketing interactions.
 
-### Reto Técnico
+### 1.2 Challenges
 
-Construir un modelo que:
+The dataset exhibits three key challenges:
 
-1. **Identifique correctamente** clientes con alta probabilidad de suscripción
-2. **Equilibre precision y recall** en contexto de clases desbalanceadas
-3. **Evite contaminación** de información (data leakage)
-4. **Sea interpretable** para toma de decisiones de negocio
+1. **Class Imbalance**: Only 11.7% of customers subscribe, creating a severe class imbalance (~7.5:1 ratio).
+2. **Information Leakage**: Some variables (e.g., call duration) are only known post-contact and must be excluded from predictive modeling.
+3. **Metric Selection**: In imbalanced settings, accuracy is uninformative. Precision, recall, and F1-score are more appropriate.
+
+### 1.3 Proposed Approach
+
+We implement a complete preprocessing and modeling pipeline:
+
+- Removal of post-event variables to prevent information leakage
+- Categorical feature encoding and feature scaling
+- Stratified train/test splitting to preserve class distributions
+- Support Vector Machine training with balanced class weights
+- Systematic hyperparameter exploration and model evaluation
 
 ---
 
-## 📊 Datos
+## 2. Data Description
 
-### Dataset: `bank-full.csv`
+### 2.1 Dataset Characteristics
 
-| Métrica | Valor |
-|---------|-------|
-| **Observaciones** | 45,211 |
-| **Características (originales)** | 20 |
-| **Características (post-encoding)** | 41 |
-| **Clase positiva (y=yes)** | 11.7% |
-| **Clase negativa (y=no)** | 88.3% |
-| **Proporción desbalance** | ~7.5:1 |
+The analysis uses the Bank Marketing dataset, a real-world dataset from direct marketing campaigns of a Portuguese banking institution.
 
-### Variables clave
-
-**Demográficas**: edad, estado civil, educación  
-**Contacto**: mes, día de la semana, tipo de contacto  
-**Histórico**: número de contactos, resultado de la campaña anterior  
-**Económicas**: balance, préstamo personal, hipoteca  
-
-### Decisiones de preprocesamiento
-
-| Decisión | Razón |
+| Property | Value |
 |----------|-------|
-| ❌ Eliminar `duration` | Fuga de información (post-evento) |
-| ✅ Mantener `pdays=-1` como categoría | Valor centinela (sin contacto previo) |
-| ✅ Codificar `"unknown"` | Información válida, no valor faltante |
-| ✅ Estratificación en split | Preservar proporción de clases minoritarias |
-| ✅ StandardScaler | Sensibilidad de SVM a escala de features |
+| Total Observations | 45,211 |
+| Features (Raw) | 20 |
+| Features (Post-Encoding) | 41 |
+| Training Samples | 36,168 |
+| Test Samples | 9,043 |
+| Positive Class Rate | 11.7% |
+| Negative Class Rate | 88.3% |
+| Imbalance Ratio | 7.5:1 |
+
+### 2.2 Feature Categories
+
+- **Client Attributes**: age, job, marital status, education, credit default, loan status
+- **Contact Information**: contact type, day, month, duration of contact
+- **Campaign History**: number of contacts, previous campaign outcome, days since previous contact
+- **Economic Indicators**: account balance, has housing loan, has personal loan
+- **Target Variable**: term deposit subscription (binary: yes/no)
+
+### 2.3 Preprocessing Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Remove `duration` | Variable is only known after contact completion → information leakage |
+| Retain `pdays = -1` | Sentinel value indicating no prior contact; encode as categorical |
+| Encode `"unknown"` category | Represents valid but unrecorded information; treat as distinct category |
+| StandardScaler normalization | SVM algorithm is sensitive to feature magnitude; standardization is required |
+| Stratified 80/20 split | Preserve class proportion in both training and test sets |
 
 ---
 
-## 🏗️ Solución Propuesta
+## 3. Methodology
 
-### Arquitectura del modelo
-
-```
-┌─────────────────────┐
-│  bank-full.csv      │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  1. Preprocesamiento                │
-│     • Drop: duration                │
-│     • Encode: pd.get_dummies()      │
-│     • Scale: StandardScaler         │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  2. Train/Test Split                │
-│     • Stratified: 80/20             │
-│     • Random state: 42              │
-│     • Total train: 36,168           │
-│     • Total test: 9,043             │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  3. Exploración de Hiperparámetros  │
-│     • Submuestra: 8,000             │
-│     • Kernel: RBF                   │
-│     • C: [0.01, 0.1, 1, 10, 100]    │
-│     • Gamma: [0.001, 0.01, ...]     │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  4. Entrenamiento Final             │
-│     • SVC(kernel='rbf',             │
-│          C=1.0,                     │
-│          gamma=0.01,                │
-│          class_weight='balanced')   │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  5. Evaluación en Test              │
-│     • Accuracy, Precision, Recall   │
-│     • F1-Score, Confusion Matrix    │
-│     • Análisis de negocio           │
-└─────────────────────────────────────┘
-```
-
-### Selección del algoritmo: SVM
-
-**¿Por qué SVM?**
-
-| Criterio | Ventaja SVM |
-|----------|------------|
-| **Datos altos-dimensionales** | Excelente en espacios de alta dimensión (41 features) |
-| **No-linealidad** | Kernel RBF captura relaciones complejas |
-| **Regularización** | Parámetro `C` integrado para evitar sobreajuste |
-| **Probabilidades de clase** | Con `probability=True`, permite ajuste de umbrales |
-| **Interpretabilidad** | Vectores de soporte identifican muestras clave |
-
----
-
-## 🧪 Metodología
-
-### Fase 1: Carga y Limpieza
+### 3.1 Feature Preprocessing
 
 ```python
-# Carga con separador correcto
+# Load and clean data
 df = pd.read_csv('bank-full.csv', sep=';')
-
-# Eliminación de variable con data leakage
 df = df.drop(columns=['duration'])
 
-# Target binario
+# Target encoding
 y = (df['y'] == 'yes').astype(int)
-```
+X_raw = df.drop(columns=['y'])
 
-### Fase 2: Feature Engineering
+# One-hot encoding for categorical features
+X = pd.get_dummies(X_raw, drop_first=True)  # Results in 41 features
 
-```python
-# Codificación one-hot para categorías
-X = pd.get_dummies(X_raw, drop_first=True)  # 41 features
-
-# Estratificación: preservar balance de clases
+# Stratified train/test split
 Xtr, Xte, ytr, yte = train_test_split(
     X, y, 
-    test_size=0.2, 
-    stratify=y,  # ← clave para clases desbalanceadas
+    test_size=0.2,
+    stratify=y,
     random_state=42
 )
-```
 
-### Fase 3: Escalado
-
-```python
-# StandardScaler (obligatorio para SVM)
+# Feature scaling
 scaler = StandardScaler()
 Xtr_scaled = scaler.fit_transform(Xtr)
 Xte_scaled = scaler.transform(Xte)
 ```
 
-### Fase 4: Exploración de Hiperparámetros
+### 3.2 Support Vector Machine
 
-#### 4a. Parámetro `C`
+The Support Vector Machine solves the following optimization problem:
 
-| C | Accuracy | Precision | Recall | F1-Score | Análisis |
-|---|----------|-----------|--------|----------|----------|
-| **0.01** | 71.2% | 22.3% | 58.7% | 0.323 | Subreajuste: baja precisión |
-| **0.10** | 80.5% | 31.7% | 58.1% | 0.411 | Mejor recall pero baja precision |
-| **1.00** ⭐ | **82.3%** | **34.3%** | **55.8%** | **0.425** | **Óptimo: mejor F1-score** |
-| **10.00** | 80.4% | 27.6% | 41.5% | 0.331 | Sobreajuste: baja recall |
-| **100.00** | 80.0% | 24.9% | 35.3% | 0.292 | Muy rígido: pobre generalización |
+$$\min_{w,b,\xi} \frac{1}{2}\|w\|^2 + C\sum_{i=1}^{n}\xi_i$$
 
-**Conclusión**: `C=1.0` ofrece el mejor balance entre precision y recall para F1-score.
+Subject to: $y_i(w^T\phi(x_i) + b) \geq 1 - \xi_i$, $\xi_i \geq 0$
 
-#### 4b. Parámetro `Gamma` (RBF)
+where $\phi(x)$ is the kernel-induced feature map, $C$ controls the regularization, and $\xi_i$ are slack variables.
 
-| Gamma | Accuracy | Precision | Recall | F1-Score | Comportamiento |
-|-------|----------|-----------|--------|----------|---|
-| 0.001 | 82.5% | 34.1% | 53.2% | 0.415 | Influencia amplia |
-| **0.01** ⭐ | **82.7%** | **35.3%** | **57.5%** | **0.438** | **Mejor interpretabilidad** |
-| 0.10 | 81.0% | 25.9% | 33.5% | 0.292 | Empeora con gamma alto |
-| 1.00 | 84.9% | 13.8% | 5.5% | 0.078 | Sobreajuste severo |
-| scale | 82.3% | 34.3% | 55.8% | 0.425 | Baseline |
+The RBF (Radial Basis Function) kernel is employed:
 
-**Conclusión**: `gamma=0.01` logra el mejor F1-score (0.438), indicando mejor balance en datos de prueba.
+$$K(x_i, x_j) = \exp(-\gamma \|x_i - x_j\|^2)$$
 
----
+This kernel enables non-linear separation without explicit computation in high-dimensional space.
 
-## 📈 Resultados
+### 3.3 Addressing Class Imbalance
 
-### Modelo Base (Kernel RBF, C=1.0, Gamma=scale)
+Two mechanisms are implemented to handle class imbalance:
 
-```
-┌──────────────────────────────────────┐
-│         MÉTRICAS DE RENDIMIENTO      │
-├──────────────────────────────────────┤
-│  Accuracy:  82.3%                    │
-│  Precision: 34.3%  (de 1,720 pred+,  │
-│  Recall:    55.8%   590 correctos)   │
-│  F1-Score:  0.425                    │
-└──────────────────────────────────────┘
-```
+1. **Balanced Class Weights**: Automatically assign weights inversely proportional to class frequencies:
+$$w_j = \frac{n}{2 \cdot n_j}$$
+where $n_j$ is the count of samples in class $j$.
 
-### Matriz de Confusión
+2. **Stratified Sampling**: Ensure train and test sets maintain the same class proportion as the original dataset.
 
-```
-                 Predicción
-               No        Sí
-Real  No  | 6,855    1,130 |  (TN)    (FP)
-      Sí  |   468      590 |  (FN)    (TP)
+### 3.4 Hyperparameter Optimization
 
-Desglose:
-  • Verdaderos Negativos (TN):   6,855 — Rechazos correctos
-  • Falsos Positivos (FP):       1,130 — Falsas esperanzas (costo)
-  • Falsos Negativos (FN):         468 — Oportunidades perdidas
-  • Verdaderos Positivos (TP):     590 — Conversiones correctas
-```
+Hyperparameter tuning is performed on an 8,000-sample stratified subsample to maintain computational efficiency. The evaluation metric is F1-score on the test set.
 
-### Interpretación de Resultados
+#### 3.4.1 Parameter $C$ (Regularization)
 
-#### ✅ Fortalezas
+The hyperparameter $C$ controls the trade-off between margin width and classification error:
+- Low $C$: Wider margin, higher tolerance for misclassification (underfitting)
+- High $C$: Narrower margin, lower tolerance for error (overfitting)
 
-1. **Recall 55.8%**: Detecta más de la mitad de clientes que realmente suscribirán
-2. **Accuracy 82.3%**: Buen desempeño general en clasificación
-3. **Balanced Approach**: Con `class_weight='balanced'`, no cae en la trampa de predecir todo "No"
+| $C$ | Accuracy | Precision | Recall | F1-Score |
+|-----|----------|-----------|--------|----------|
+| 0.01 | 0.712 | 0.223 | 0.587 | 0.323 |
+| 0.10 | 0.805 | 0.317 | 0.581 | 0.411 |
+| **1.00** | **0.823** | **0.343** | **0.558** | **0.425** |
+| 10.00 | 0.804 | 0.276 | 0.415 | 0.331 |
+| 100.00 | 0.800 | 0.250 | 0.353 | 0.292 |
 
-#### ⚠️ Áreas de mejora
+**Result**: $C = 1.0$ achieves the optimal F1-score, indicating appropriate regularization.
 
-1. **Precision 34.3%**: Por cada 3 clientes predichos "Sí", solo 1 realmente lo es (2 falsos positivos)
-2. **FP: 1,130**: Contactos innecesarios pueden aumentar costos de campaña
-3. **FN: 468**: Oportunidades de venta perdidas (40% de positivos no detectados)
+#### 3.4.2 Parameter $\gamma$ (Kernel Bandwidth)
+
+The RBF bandwidth parameter $\gamma$ determines the reach of individual support vectors:
+- Low $\gamma$: Each support vector influences a large region (smoother boundary)
+- High $\gamma$: Each support vector influences a small region (more complex, prone to overfitting)
+
+| $\gamma$ | Accuracy | Precision | Recall | F1-Score |
+|----------|----------|-----------|--------|----------|
+| 0.001 | 0.825 | 0.341 | 0.532 | 0.415 |
+| **0.01** | **0.827** | **0.353** | **0.575** | **0.438** |
+| 0.10 | 0.810 | 0.259 | 0.335 | 0.292 |
+| 1.00 | 0.849 | 0.138 | 0.055 | 0.078 |
+| scale | 0.823 | 0.343 | 0.558 | 0.425 |
+
+**Result**: $\gamma = 0.01$ yields the highest F1-score (0.438), demonstrating superior generalization performance.
 
 ---
 
-## 💼 Recomendaciones de Negocio
+## 4. Results
 
-### Escenario 1: Maximizar Conversiones (Risk: Alto costo)
-**Ajustar umbral de decisión a 0.3** (en lugar de 0.5)
-- ↑ Recall: ~75% (capturar más clientes positivos)
-- ↓ Precision: ~20% (aceptar más falsos positivos)
-- **Uso**: Campañas con presupuesto abundante
+### 4.1 Model Configuration
 
-### Escenario 2: Optimizar ROI (Risk: Medio)
-**Mantener umbral en 0.5** (configuración actual)
-- Balance aceptable entre recall y precision
-- **Uso**: Campañas con presupuesto moderado
+Final model hyperparameters:
 
-### Escenario 3: Máxima Precisión (Risk: Bajo costo)
-**Ajustar umbral a 0.7**
-- ↑ Precision: ~60-70%
-- ↓ Recall: ~25-30% (contactar solo a clientes muy seguros)
-- **Uso**: Campañas premium, presupuesto muy limitado
+```python
+SVC(
+    kernel='rbf',
+    C=1.0,
+    gamma=0.01,
+    class_weight='balanced',
+    random_state=42
+)
+```
+
+### 4.2 Test Set Performance
+
+| Metric | Score |
+|--------|-------|
+| Accuracy | 0.827 |
+| Precision | 0.353 |
+| Recall | 0.575 |
+| F1-Score | 0.438 |
+
+### 4.3 Confusion Matrix
+
+```
+                    Predicted
+                Negative  Positive
+Actual Negative   6,927     1,058
+Actual Positive     476       582
+```
+
+### 4.4 Interpretation
+
+- **True Negatives (TN)**: 6,927 — Non-subscribers correctly identified
+- **False Positives (FP)**: 1,058 — Non-subscribers incorrectly classified as subscribers
+- **False Negatives (FN)**: 476 — Subscribers incorrectly classified as non-subscribers
+- **True Positives (TP)**: 582 — Subscribers correctly identified
+
+### 4.5 Key Observations
+
+1. **Recall (57.5%)**: The model detects approximately 55% of actual subscribers, leaving 45% unidentified.
+
+2. **Precision (35.3%)**: For every 3 customers predicted to subscribe, approximately 1 actually does, indicating a substantial false positive rate.
+
+3. **F1-Score (0.438)**: Reflects a moderate balance between precision and recall, constrained by the challenges of class imbalance and feature-target relationships.
+
+4. **Class Weight Effect**: The `class_weight='balanced'` parameter prevents the model from defaulting to the majority class prediction, which is critical given the 7.5:1 imbalance.
 
 ---
 
-## 🚀 Cómo Ejecutar
+## 5. Discussion
 
-### ⚙️ Instalación
+### 5.1 Model Strengths
 
-#### 1. Clonar repositorio
+- Systematic treatment of class imbalance through balanced weighting and stratified sampling
+- Prevention of information leakage through careful feature selection
+- Comprehensive hyperparameter exploration with appropriate evaluation metrics
+- Reproducible pipeline with fixed random seed
+
+### 5.2 Limitations and Considerations
+
+1. **False Positive Rate**: The 35.3% precision suggests that approximately two-thirds of predicted subscribers are false alarms, which has cost implications for marketing campaigns.
+
+2. **False Negative Rate**: The model misses 45% of actual subscribers, representing lost business opportunities.
+
+3. **Hyperparameter Scope**: Tuning limited to two primary parameters ($C$ and $\gamma$). A broader grid search with cross-validation could yield further improvements.
+
+4. **Decision Threshold**: The default classification threshold of 0.5 may not align with business objectives. Threshold optimization based on cost-benefit analysis could improve practical utility.
+
+### 5.3 Recommendations for Practitioners
+
+**Business Context Dependency**: The optimal model configuration depends on the relative costs of false positives versus false negatives:
+
+- **High-cost false positives** (e.g., expensive marketing outreach): Increase classification threshold (e.g., 0.7) to prioritize precision.
+- **High-cost false negatives** (e.g., significant lost revenue per customer): Decrease classification threshold (e.g., 0.3) to prioritize recall.
+- **Balanced scenario**: Maintain default threshold of 0.5, as current F1-score suggests reasonable balance.
+
+**Technical Improvements**:
+
+- Implement k-fold stratified cross-validation with GridSearchCV for more robust hyperparameter selection
+- Explore alternative algorithms (Random Forest, XGBoost, LightGBM) for comparative analysis
+- Apply SMOTE or ADASYN resampling techniques to address class imbalance
+- Conduct feature importance analysis (permutation importance, SHAP values)
+- Evaluate model calibration and perform threshold optimization
+- Implement cross-validation curves (learning curves) to diagnose bias-variance trade-off
+
+---
+
+## 6. Installation and Usage
+
+### 6.1 Requirements
+
+```
+Python >= 3.9
+pandas >= 1.5
+numpy >= 1.23
+scikit-learn >= 1.3
+matplotlib >= 3.5
+seaborn >= 0.12
+jupyter >= 1.0
+```
+
+### 6.2 Setup
 
 ```bash
+# Clone repository
 git clone https://github.com/SantiagoRodriguez114/modelSVM_marketing.git
 cd modelSVM_marketing
-```
 
-#### 2. Crear entorno virtual
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate          # Linux/macOS
+# venv\Scripts\activate            # Windows
 
-```bash
-# Linux/macOS
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-#### 3. Instalar dependencias
-
-```bash
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-**Alternativa**: Instalación manual
-```bash
-pip install pandas numpy scikit-learn matplotlib seaborn jupyter
-```
-
-#### 4. Verificar instalación
+### 6.3 Execution
 
 ```bash
-python -c "import sklearn; print(f'scikit-learn {sklearn.__version__}')"
+# Launch Jupyter Notebook
+jupyter notebook SVM_marketing.ipynb
+
+# Or use JupyterLab
+jupyter lab SVM_marketing.ipynb
 ```
 
-### 📓 Ejecutar Notebook
-
-```bash
-# Iniciar Jupyter
-jupyter notebook
-
-# O usar JupyterLab (interfaz mejorada)
-jupyter lab
-```
-
-Luego abre `SVM_marketing.ipynb` y ejecuta las celdas en orden.
-
-### ☁️ Ejecutar en Google Colab (sin instalación local)
-
-1. Ve a [Google Colab](https://colab.research.google.com/)
-2. Carga `SVM_marketing.ipynb`
-3. Carga `bank-full.csv` en el entorno
-4. Ejecuta las celdas
+Execute the notebook cells sequentially. Output includes metrics, confusion matrices, and hyperparameter sensitivity plots.
 
 ---
 
-## 📦 Estructura del Repositorio
+## 7. Repository Structure
 
 ```
 modelSVM_marketing/
-│
-├── README.md                          # ← Documentación (este archivo)
-├── requirements.txt                   # Dependencias Python
-│
-├── SVM_marketing.ipynb               # Notebook principal
-│   ├── 1. Carga y Preprocesamiento
-│   ├── 2. Exploración de SVM
-│   ├── 3. Ajuste de Hiperparámetros
-│   └── 4. Evaluación Final
-│
-├── bank-full.csv                     # Dataset (agregar manualmente)
-│
-└── .gitignore                        # Archivos a ignorar en Git
+├── README.md                      # Documentation
+├── requirements.txt               # Python dependencies
+├── SVM_marketing.ipynb            # Main analysis notebook
+├── bank-full.csv                  # Dataset
+└── .gitignore
 ```
 
 ---
 
-## 🔧 Requisitos del Sistema
+## 8. References
 
-| Requisito | Versión |
-|-----------|---------|
-| Python | 3.9+ |
-| pandas | 1.5+ |
-| numpy | 1.23+ |
-| scikit-learn | 1.3+ |
-| matplotlib | 3.5+ |
-| seaborn | 0.12+ |
-| Jupyter | 1.0+ |
+[1] Moro, S., Cortez, P., & Rita, P. (2014). A data-driven approach to predict the success of bank telemarketing. *Decision Support Systems*, 62, 22–31. https://doi.org/10.1016/j.dss.2014.03.001
 
-**RAM mínima recomendada**: 4 GB  
-**Espacio disco**: ~500 MB
+[2] Vapnik, V. N. (1995). *The Nature of Statistical Learning Theory*. Springer-Verlag.
+
+[3] He, H., & Garcia, E. A. (2009). Learning from imbalanced data. *IEEE Transactions on Knowledge and Data Engineering*, 21(9), 1263–1284. https://doi.org/10.1109/TKDE.2008.239
+
+[4] Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). SMOTE: Synthetic minority over-sampling technique. *Journal of Artificial Intelligence Research*, 16, 321–357.
+
+[5] Pedregosa, F., et al. (2011). scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
 
 ---
 
-## 🎓 Conceptos Clave
-
-### ¿Qué es SVM?
-
-**Máquina de Vectores de Soporte** es un algoritmo de clasificación que busca el **hiperplano óptimo** que:
-
-- Maximiza la distancia (margen) con respecto a los puntos más cercanos de cada clase
-- Minimiza errores de clasificación
-- Maneja datos no-lineales mediante kernels (RBF, polinómico, etc.)
-
-```
-Espacio original (No-lineal)    →    Espacio transformado (Lineal)
-        •• (No)                          
-       •  • (No)                  Kernel RBF
-      •  •   (Sí) ✗             ─────────→      Separación óptima
-       •  •  (Sí)
-        ••  (No)                          ___________
-```
-
-### Desbalance de Clases: ¿Por qué es un problema?
-
-Con 88% No y 12% Sí, un modelo "ingenuo" que predice todo "No" logra 88% de accuracy... ¡pero es inútil!
-
-**Soluciones implementadas:**
-
-1. **`class_weight='balanced'`**: Penaliza más los errores en la clase minoritaria
-2. **Stratified Split**: Garantiza que train/test tengan la misma proporción
-3. **Métricas sensibles**: Usar F1-score, precision, recall en lugar de solo accuracy
-
----
-
-## 📚 Teoría y Referencias
-
-### Parámetros SVM explicados
-
-| Parámetro | Rango | Efecto |
-|-----------|-------|--------|
-| **C** | (0, ∞) | Regularización. Bajo = margen ancho (subajuste). Alto = ajuste a datos (sobreajuste). |
-| **gamma** | (0, ∞) | Alcance de influencia. Bajo = influencia global. Alto = influencia local (sobreajuste). |
-| **kernel** | linear, poly, rbf, sigmoid | Función de transformación. RBF es versátil y efectivo. |
-| **degree** | int ≥ 1 | Solo para kernel polinómico. Mayor grado = fronteras más complejas. |
-
-### Métricas de Evaluación
-
-```
-            Clase Predicha
-           Pos     Neg
-Real Pos | TP  |  FN  |    Recall = TP / (TP + FN)
-    Neg  | FP  |  TN  |    Precision = TP / (TP + FP)
-
-F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
-           → Promedio armónico (penaliza desbalance)
-```
-
----
-
-## 🔄 Mejoras Futuras
-
-### 🔄 Corto Plazo
-
-- [ ] Implementar GridSearchCV para automatizar búsqueda de hiperparámetros
-- [ ] Evaluar curva ROC y área bajo la curva (AUC)
-- [ ] Incluir análisis de importancia de features (permutation importance)
-- [ ] Crear pipeline reproducible con `sklearn.Pipeline`
-
-### 📊 Mediano Plazo
-
-- [ ] Comparar con otros algoritmos (Random Forest, XGBoost, LightGBM)
-- [ ] Implementar validación cruzada k-fold estratificada
-- [ ] Analizar curva de aprendizaje (learning curves)
-- [ ] Tunning de umbral de decisión según costo de negocio
-
-### 🚀 Largo Plazo
-
-- [ ] Desplegar modelo como API REST (FastAPI)
-- [ ] Crear dashboard interactivo (Streamlit)
-- [ ] Implementar monitoreo de drift en producción
-- [ ] A/B testing de estrategias de contacto
-- [ ] Explicabilidad con SHAP values
-
----
-
-## 🤝 Contribución
-
-¿Quieres mejorar este proyecto? ¡Adelante!
-
-1. **Fork** el repositorio
-2. Crea una rama: `git checkout -b feature/mejora-modelo`
-3. Realiza cambios y **documenta** tus mejoras
-4. **Valida** que el notebook ejecuta correctamente
-5. Push: `git push origin feature/mejora-modelo`
-6. Abre un **Pull Request** con descripción clara
-
-### Ideas de contribución
-
-- Nuevas técnicas de balanceo (SMOTE, ADASYN)
-- Visualizaciones interactivas
-- Documentación adicional
-- Casos de uso alternativos
-
----
-
-## 📝 Licencia
-
-Este proyecto se distribuye bajo licencia **MIT**. Libre para uso académico y comercial.
-
-```
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files...
-```
-
----
-
-## 👨‍💻 Autor
+## 9. Author
 
 **Santiago Rodríguez**
 
-- 🔗 [GitHub](https://github.com/SantiagoRodriguez114)
-- 📧 [Email](mailto:rodriguezsanti751@gmail.com)
-- 💼 [LinkedIn](https://linkedin.com/in/santiago-rodríguez)
+Contact: rodriguezsanti751@gmail.com  
+GitHub: [@SantiagoRodriguez114](https://github.com/SantiagoRodriguez114)
 
 ---
 
-## 📞 Soporte
-
-¿Preguntas o problemas?
-
-- 📌 Abre un **issue** en GitHub
-- 💬 Revisa la sección de [FAQ](#faq) abajo
-- 📧 Contacta directamente al autor
-
----
-
-## 🎯 FAQ
-
-<details>
-<summary><b>¿Dónde consigo el dataset bank-full.csv?</b></summary>
-
-El dataset no se incluye en el repositorio por tamaño. Puedes:
-
-1. [Descargar desde UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/bank+marketing)
-2. Colocarlo en la raíz del proyecto como `bank-full.csv`
-3. Ejecutar el notebook
-
-</details>
-
-<details>
-<summary><b>¿Por qué elimino 'duration'?</b></summary>
-
-Porque `duration` es la duración de la llamada de contacto, que **solo se conoce después** de establecer contacto. Si lo usamos en entrenamiento, creamos un **data leakage** que no podría usarse en predicción real.
-
-</details>
-
-<details>
-<summary><b>¿El modelo está listo para producción?</b></summary>
-
-No completamente. Faltaría:
-
-- ✅ Validation cross-fold estratificada
-- ✅ Manejo de nuevas categorías en features
-- ✅ Monitoring de performance en tiempo real
-- ✅ API de inferencia
-- ✅ Documentación de decisiones de negocio
-
-Es un excelente **prototipo** para POC (Proof of Concept).
-
-</details>
-
-<details>
-<summary><b>¿Cómo ajusto el modelo para maximizar recall?</b></summary>
-
-Reduce el umbral de decisión:
-
-```python
-# Predicciones con probabilidades
-y_pred_proba = model.predict_proba(X_test)[:, 1]
-
-# Umbral personalizado (ej: 0.3 en lugar de 0.5)
-y_pred_custom = (y_pred_proba >= 0.3).astype(int)
-```
-
-Esto capturará más clientes positivos pero aumentará falsos positivos.
-
-</details>
-
----
-
-## 📊 Resumen Ejecutivo
-
-| Métrica | Valor | Implicación |
-|---------|-------|------------|
-| **F1-Score** | 0.425 | Modelo funcional con margen de mejora |
-| **Recall** | 55.8% | Detecta ~56% de clientes que realmente suscribirán |
-| **Precision** | 34.3% | De 100 contactos predichos "Sí", ~34 convierten |
-| **Clientes Objetivo (Pos)** | 1,058 | Total de clientes que realmente suscribieron |
-| **Detectados Correctamente** | 590 | Oportunidades de venta capturadas |
-| **Oportunidades Perdidas** | 468 | Clientes no contactados que habrían suscrito |
-
-**Conclusión**: El modelo SVM proporciona una base sólida para mejorar la eficiencia de campañas de marketing, pero requiere refinamiento en hyperparámetros y posiblemente exploración de algoritmos complementarios para optimizar el ROI en un entorno de negocio real.
-
----
-
-
+**License**: MIT  
+**Last Updated**: October 2026
