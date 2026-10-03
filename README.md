@@ -16,7 +16,7 @@
 
 ---
 
-## 🎯 Descripción Ejecutiva
+## 🎯 Descripción 
 
 Este proyecto implementa un **modelo de clasificación SVM** de nivel producción para predecir si un cliente bancario suscribirá un depósito a plazo. Aborda los desafíos reales de:
 
@@ -589,10 +589,4 @@ Esto capturará más clientes positivos pero aumentará falsos positivos.
 
 ---
 
-<div align="center">
 
-**⭐ Si este proyecto te fue útil, no olvides dejar una estrella en GitHub ⭐**
-
-[🔝 Volver al inicio](#-svm-marketing-classification-model)
-
-</div>
